@@ -38,9 +38,9 @@ public class RobotContainer {
 
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
+        drivetrain.applyRequest(() -> drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with
                                                                                            // negative Y (forward)
-            .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
@@ -60,6 +60,16 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;  
 
   public RobotContainer() {
+    drivetrain.getModule(0).getDriveMotor().getConfigurator().refresh(TunerConstants.driverRamp);
+    drivetrain.getModule(0).getSteerMotor().getConfigurator().refresh(TunerConstants.steerRamp);
+    drivetrain.getModule(1).getDriveMotor().getConfigurator().refresh(TunerConstants.driverRamp);
+    drivetrain.getModule(1).getSteerMotor().getConfigurator().refresh(TunerConstants.steerRamp);
+    drivetrain.getModule(2).getDriveMotor().getConfigurator().refresh(TunerConstants.driverRamp);
+    drivetrain.getModule(2).getSteerMotor().getConfigurator().refresh(TunerConstants.steerRamp);
+    drivetrain.getModule(3).getDriveMotor().getConfigurator().refresh(TunerConstants.driverRamp);
+    drivetrain.getModule(3).getSteerMotor().getConfigurator().refresh(TunerConstants.steerRamp);
+
+
     NamedCommands.registerCommand("printSomething", drivetrain.printSomething("++++++++++++++"));
 
     configureBindings();
