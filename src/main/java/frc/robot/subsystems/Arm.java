@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import org.photonvision.PhotonCamera;
+
 public class Arm extends SubsystemBase {
 
   public double throughBoreEncoderOffset = 0.49;
@@ -130,11 +132,27 @@ public class Arm extends SubsystemBase {
     // } else {
     //   armPidController.setPID(0.3, 0.0, 0.0);
     // }
-      armPidController.setPID(0.007, 0, 0);
-            // System.out.println("going up to top");
-    
-    armPidController.setSetpoint(90);  
+
+    armPidController.setPID(0.007, 0, 0);   
+    var result = aprilCam.getLatestResults();
+    if(!result.hasTargets()){
+      System.out.println("Could not find targets; defaulting to 90 degrees");
+      // default to 90 degrees
+      armPidController.setSetpoint(90);
+    }
+    else{
+      // trust photonvision model to know the best target
+      PhotonTrackedTarget target = result.getBestTarget();
+      // getting a full pose is unnecessary, because we can already get what we need without calculations
+      double pitch = target.getPitch();
+      // in future may want to add sanity checks on the returned value
+      // we can assume it will be greater than zero, because if our robot is _above_ an AprilTag
+      // we have much bigger problems
+      armPidController.setSetpoint(pitch);
+    }
+
     pos = 3;
+    
   }
 
   public void setFrontSubwooferPosition() {
