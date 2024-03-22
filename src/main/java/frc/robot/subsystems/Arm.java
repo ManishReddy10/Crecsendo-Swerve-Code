@@ -145,9 +145,17 @@ public class Arm extends SubsystemBase {
       PhotonTrackedTarget target = result.getBestTarget();
       // getting a full pose is unnecessary, because we can already get what we need without calculations
       double pitch = target.getPitch();
-      // in future may want to add sanity checks on the returned value
+      // in future may want to add more sanity checks on the returned value
       // we can assume it will be greater than zero, because if our robot is _above_ an AprilTag
       // we have much bigger problems
+      if(pitch < 0){
+        pitch = 0;
+      };
+
+      // put upper boundary at 90 degrees
+      if(pitch > 90){
+        pitch = 90;
+      };
       armPidController.setSetpoint(pitch);
     }
 
