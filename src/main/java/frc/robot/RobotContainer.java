@@ -26,6 +26,8 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 
+import org.photonvision.PhotonCamera;
+
 public class RobotContainer {
   Intake intake = new Intake();
   Shooter shooter = new Shooter();
