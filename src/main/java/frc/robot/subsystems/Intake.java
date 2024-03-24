@@ -29,7 +29,7 @@ public class Intake extends SubsystemBase {
   
   public static CANSparkMax intakeSparkMax = new CANSparkMax(21, MotorType.kBrushed);
   public static SparkAbsoluteEncoder throughBoreEncoder = intakeSparkMax.getAbsoluteEncoder();
-
+  private boolean intakeSensorBoolean;
   // intakeSparkMax.getEncoder(Type.kQuadrature, 8192);
 
   DigitalInput infaredReflectionBottom = new DigitalInput(2); // The infared sensor closest to ground when arm is fully down
@@ -65,6 +65,7 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
+    // System.out.println(getIntakeSensor());
     // System.out.println("LED LENGTH: " + m_ledBuffer.getLength());
 
     if (infaredReflectionTop.get() == false) {
@@ -100,6 +101,10 @@ public class Intake extends SubsystemBase {
 
   public void testInstantCommand() {
 
+  }
+
+  public boolean getIntakeSensor() {
+    return intakeSensorBoolean;
   }
 
   public Command setIntakePower(double power) {

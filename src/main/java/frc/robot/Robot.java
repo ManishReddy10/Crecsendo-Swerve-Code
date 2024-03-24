@@ -6,6 +6,7 @@ package frc.robot;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,18 +17,11 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
-  PhotonCamera noteCam = new PhotonCamera("Microsoft_LifeCam_HD-3000 (1)");
-  PhotonCamera aprilCam = new PhotonCamera("USB_Camera");
 
   @Override
   public void robotInit() {
     m_robotContainer = new RobotContainer();
-
-    PortForwarder.add(5800, "photonvision.local", 5800);
-    noteCam.setDriverMode(true);
-    noteCam.setPipelineIndex(1); // Note pipeline
-    aprilCam.setDriverMode(false);
-    aprilCam.setPipelineIndex(2); // AprilTag pipeline
+    CameraServer.startAutomaticCapture();
     // print out latency seconds ?
 
 
