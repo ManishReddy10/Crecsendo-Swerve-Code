@@ -20,9 +20,14 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.trobot5013lib.led.BlinkingPattern;
+import frc.robot.trobot5013lib.led.ChasePattern;
+import frc.robot.trobot5013lib.led.IntensityPattern;
+import frc.robot.trobot5013lib.led.RainbowPattern;
 import frc.robot.trobot5013lib.led.TrobotAddressableLED;
 
 public class Intake extends SubsystemBase {
@@ -42,47 +47,69 @@ public class Intake extends SubsystemBase {
          .getEntry();
 
 
-  AddressableLED m_led = new AddressableLED(3);
-  AddressableLEDBuffer m_ledBuffer = new AddressableLEDBuffer(60);
-  // TrobotAddressableLED m_led = new TrobotAddressableLED(3, 0);
-
-
+  // AddressableLED m_led = new AddressableLED(3);
+  // AddressableLEDBuffer m_ledBuffer = new AddressableLEDBuffer(60);
+  // https://www.rapidtables.com/web/color/index.html
+  Color orange = new Color(255,165,0);
+  Color white = new Color(255,69,0);
+  Color lawngreen = new Color(124,252,0);
+  Color[] chasingColorArray = new Color[3];
+  
+  TrobotAddressableLED m_ledStrip = new TrobotAddressableLED(3, 60);
+  BlinkingPattern blinkingOrange = new BlinkingPattern(orange, 0.6);
+  ChasePattern chaseOrange = new ChasePattern(chasingColorArray, 10);
+  IntensityPattern testIntensityPattern = new IntensityPattern(lawngreen, orange, 0.8);
+  RainbowPattern tesRainbowPattern = new RainbowPattern();
+  
   /** Creates a new Intake. */
   public Intake() {
     intakeSparkMax.setSmartCurrentLimit(30);
-        // PWM port 9
+    chasingColorArray[0] = orange;
+    chasingColorArray[1] = white;
+    chasingColorArray[2] = lawngreen;
+
+
+
+    // PWM port 9
     // Must be a PWM header, not MXP or DIO
 
     // Reuse buffer
     // Default to a length of 60, start empty output
     // Length is expensive to set, so only set it once, then just update data
-    m_led.setLength(m_ledBuffer.getLength()); // length is 60
+    // m_led.setLength(m_ledBuffer.getLength()); // length is 60
     
-    m_led.start();
+    // m_led.start();
   }
 
   @Override
   public void periodic() {
+
+    
+
     // This method will be called once per scheduler run
 
     // System.out.println(getIntakeSensor());
     // System.out.println("LED LENGTH: " + m_ledBuffer.getLength());
-
     if (infaredReflectionTop.get() == false) {
+        m_ledStrip.setPattern(chaseOrange);
+    } else {
+      m_ledStrip.setPattern(tesRainbowPattern);
+    }
+  //   if (infaredReflectionTop.get() == false) {
       
     
-    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-      // Sets the specified LED to the RGB values for red
-      m_ledBuffer.setRGB(i, 255, 50, 0);
-   }
-  } else {
-    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-      // Sets the specified LED to the RGB values for red
-      m_ledBuffer.setRGB(i, 0, 0, 100);
-       }
-  }
+  //   for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+  //     // Sets the specified LED to the RGB values for red
+  //     m_ledBuffer.setRGB(i, 255, 50, 0);
+  //  }
+  // } else {
+  //   for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+  //     // Sets the specified LED to the RGB values for red
+  //     m_ledBuffer.setRGBi(i, 0, 0, 100);
+  //      }
+  // }
     // Set the data
-    m_led.setData(m_ledBuffer);
+    // m_led.setData(m_ledBuffer);
 
     SmartDashboard.putBoolean("Infadred", infaredReflectionTop.get());
 
@@ -133,8 +160,25 @@ public class Intake extends SubsystemBase {
     if (infaredReflectionTop.get() == false) {
       intakeSparkMax.set(0);
     } else {
-      intakeSparkMax.set(0.6);
+      intakeSparkMax.set(0.9);
     }
+    
+    // Add led switching 
+    // Add negative signs where needed 
+    // if ((infaredReflectionTop.get() == false) && (infaredReflectionBottom.get() == false)) {
+    //   intakeSparkMax.set(0.0);
+
+    // } else if ((infaredReflectionTop.get() == false) && (infaredReflectionBottom.get() == true)) {
+    //   intakeSparkMax.set(-0.6);
+
+    // } else if ((infaredReflectionTop.get() == true) && (infaredReflectionBottom.get() == false)) {
+    //   intakeSparkMax.set(0.6);
+
+    // } else if ((infaredReflectionTop.get() == true) && (infaredReflectionBottom.get() == true)) {
+    //   intakeSparkMax.set(0.9);
+
+    // }
+
   }
 
 
