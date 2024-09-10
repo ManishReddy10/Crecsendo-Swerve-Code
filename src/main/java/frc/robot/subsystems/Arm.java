@@ -34,6 +34,8 @@ public class Arm extends SubsystemBase {
   public double throughBoreEncoderOffset = 0.49;
   public double tolerance = 1;
   public double throughBoreEncoderUsableValue;
+
+  Intake m_Intake;
   // 1 - 0.50866;
   // 1 - 0.509721113920211792;
 
@@ -69,7 +71,7 @@ public class Arm extends SubsystemBase {
 
 
   /** Creates a new Arm. */
-  public Arm() {
+  public Arm(Intake m_Intake) {
     rightArmMotor.setSmartCurrentLimit(30);
     leftArmMotor.setSmartCurrentLimit(30);
 
@@ -81,7 +83,8 @@ public class Arm extends SubsystemBase {
     //armPidController.setSetpoint(0);
 
     // Intake.throughBoreEncoder.setZeroOffset(throughBoreEncoderOffset);
-    Intake.throughBoreEncoder.setInverted(true);
+    m_Intake.getThroughBoreEncoder().setInverted(true);
+    m_Intake = this.m_Intake;
     // leftEncoder.setPosition(0);
   }
 
@@ -192,7 +195,7 @@ public class Arm extends SubsystemBase {
     
     /*Converts Neo internal motor encoder to degrees */
     public double getPositionDegrees() {
-      return (Units.rotationsToDegrees(Intake.throughBoreEncoder.getPosition()));
+      return (Units.rotationsToDegrees(m_Intake.getThroughBoreEncoder().getPosition()));
     }
     
 
@@ -213,9 +216,9 @@ public class Arm extends SubsystemBase {
       // if(getPositionDegrees() >= 80){
       //   leftArmMotor.set(0);
       // } else {
-      throughBoreEncoderUsableValue = Intake.throughBoreEncoder.getPosition();
+      throughBoreEncoderUsableValue = m_Intake.getThroughBoreEncoder().getPosition();
       
-      leftArmMotor.set(armPidController.calculate(Intake.throughBoreEncoder.getPosition()));
+      leftArmMotor.set(armPidController.calculate(m_Intake.getThroughBoreEncoder().getPosition()));
       // }
 
       /*Resets neo encoder position to 0 when arm hits limit switch */
