@@ -48,17 +48,22 @@ public class RobotContainer {
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
+  // Photonvision Drive to angle
+  // double speakerTagAngle = 0;
+  // SwerveRequest.FieldCentricFacingAngle driveWithAngleToShooter = new  SwerveRequest.FieldCentricFacingAngle()
+  //           .withTargetDirection(Rotation2d.fromDegrees(speakerTagAngle));         
+
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(driverJoystick.getLeftY() * MaxSpeed) // Drive forward with
+        drivetrain.applyRequest(() -> drive.withVelocityX(-driverJoystick.getLeftY() * MaxSpeed) // Drive forward with
                                                                                            // negative Y (forward)
-            .withVelocityY(driverJoystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            .withVelocityY(-driverJoystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driverJoystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
     driverJoystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     driverJoystick.b().whileTrue(drivetrain
-        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driverJoystick.getLeftY(), -driverJoystick.getLeftX()))));
+        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driverJoystick.getLeftY(), driverJoystick.getLeftX()))));
 
     // reset the field-centric heading on left bumper press
     driverJoystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
@@ -86,14 +91,17 @@ public class RobotContainer {
     
     // operatorJoystick.x().whileTrue(shooter.setShooterPower(0.7));
     
-    operatorJoystick.povDown().whileTrue(arm.setArmPower(-0.1));
-    operatorJoystick.povUp().whileTrue(arm.setArmPower(0.1));
+    // operatorJoystick.povDown().whileTrue(arm.setArmPower(-0.1));
+    // operatorJoystick.povUp().whileTrue(arm.setArmPower(0.1));
 
+    operatorJoystick.povDown().whileTrue(new InstantCommand(()-> arm.manualArmPositionDown(), arm));
+    operatorJoystick.povUp().whileTrue(new InstantCommand(()-> arm.manualArmPositionUp(), arm));
     
     // operatorJoystick.b().whileTrue(new InstantCommand(()-> arm.setArmPosition(40), arm)).onFalse(new InstantCommand(()-> arm.setArmPosition(20), arm));
     operatorJoystick.b().whileTrue(new InstantCommand(()-> arm.setFrontSubwooferPosition(), arm));
     operatorJoystick.a().whileTrue(new InstantCommand(()-> arm.setPickupPosition(), arm));
     operatorJoystick.y().whileTrue(new InstantCommand(()-> arm.setTopPosition(), arm));
+    // operatorJoystick.x().whileTrue(new InstantCommand(()-> arm.setDefensePosition(), arm));
 
   }
 
@@ -121,8 +129,10 @@ public class RobotContainer {
 
 
     NamedCommands.registerCommand("printSomething", drivetrain.printSomething("++++++++++++++"));
+    NamedCommands.registerCommand("runIntakeUntilBeamBreak", intake.runIntakeUntilBeamBreakCommand()); // If put in parallel command group we can leave and end leave with this command the grabbing of note
     NamedCommands.registerCommand("oneNoteSubwooferRoutine", oneNoteScoreAtSubwoofer());
-
+    NamedCommands.registerCommand("driveOutFrontSubwoofer", driveOutFrontSubwoofer());
+// runIntakeUntilBeamBreakCommand
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -131,8 +141,30 @@ public class RobotContainer {
 
 
 
+  public Command driveOutFrontSubwoofer() {
+    
+      return drivetrain.applyRequest(() -> drive.withVelocityX(1) // Drive forward with
+                                                                                           // negative Y (forward)
+            .withVelocityY(0) // Drive left with negative X (left)
+            .withRotationalRate(0) // Drive counterclockwise with negative X (left)
+        ).ignoringDisable(true);
+    
+    }
+
+    public Command driveReturnToFrontSubwoofer() {
+    
+      return drivetrain.applyRequest(() -> drive.withVelocityX(-1) // Drive forward with
+                                                                                           // negative Y (forward)
+            .withVelocityY(0) // Drive left with negative X (left)
+            .withRotationalRate(0) // Drive counterclockwise with negative X (left)
+        ).ignoringDisable(true);
+    
+    }
+  
+    
 
   public Command getAutonomousCommand() {
+    // return driveForward();
     return autoChooser.getSelected();
   }
 }

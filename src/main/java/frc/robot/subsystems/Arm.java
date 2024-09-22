@@ -137,6 +137,19 @@ public class Arm extends SubsystemBase {
     pos = 3;
   }
 
+  public void setDefensePosition() {
+    // if (getPositionDegrees() > 40){
+    //   armPidController.setPID(0.01, 0.001, 0.0);
+    // } else {
+    //   armPidController.setPID(0.3, 0.0, 0.0);
+    // }
+      armPidController.setPID(0.007, 0, 0);
+            // System.out.println("going up to top");
+    
+    armPidController.setSetpoint(60);  
+    pos = 3;
+  }
+
   public void setFrontSubwooferPosition() {
     if (pos == 3) {
       armPidController.setPID(0.006, 0, 0);
@@ -157,6 +170,32 @@ public class Arm extends SubsystemBase {
   
     }
   
+    public void manualArmPositionUp() {
+      // if (getPositionDegrees() > 40){
+      //   armPidController.setPID(0.01, 0.001, 0.0);
+      // } else {
+      //   armPidController.setPID(0.3, 0.0, 0.0);
+      // }
+        armPidController.setPID(0.007, 0, 0);
+              // System.out.println("going up to top");
+        
+      armPidController.setSetpoint(armPidController.getSetpoint()+1);
+      
+    }
+
+    public void manualArmPositionDown() {
+      // if (getPositionDegrees() > 40){
+      //   armPidController.setPID(0.01, 0.001, 0.0);
+      // } else {
+      //   armPidController.setPID(0.3, 0.0, 0.0);
+      // }
+        armPidController.setPID(0.007, 0, 0);
+              // System.out.println("going up to top");
+        
+      armPidController.setSetpoint(armPidController.getSetpoint()-1);
+      
+    }
+  
   // public void autonArmTopToBottomInitialization() {
   //   while (armLimitSwitch.get() == true) {
   //    leftArmMotor.set(-0.2);
@@ -166,6 +205,7 @@ public class Arm extends SubsystemBase {
     
   //   System.out.println("--------------------------------------------------------------------------------------------------------------------------------------");
   // }
+
 
   
 
