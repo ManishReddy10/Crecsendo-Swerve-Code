@@ -29,7 +29,7 @@ import frc.robot.subsystems.Shooter;
 public class RobotContainer {
   Intake intake = new Intake();
   Shooter shooter = new Shooter();
-  Arm arm = new Arm(intake);
+  Arm arm = new Arm();
 
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
   private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
@@ -91,9 +91,11 @@ public class RobotContainer {
     
     // operatorJoystick.x().whileTrue(shooter.setShooterPower(0.7));
     
-    operatorJoystick.povDown().whileTrue(arm.setArmPower(-0.1));
-    operatorJoystick.povUp().whileTrue(arm.setArmPower(0.1));
+    // operatorJoystick.povDown().whileTrue(arm.setArmPower(-0.1));
+    // operatorJoystick.povUp().whileTrue(arm.setArmPower(0.1));
 
+    operatorJoystick.povDown().whileTrue(new InstantCommand(()-> arm.manualArmPositionDown(), arm));
+    operatorJoystick.povUp().whileTrue(new InstantCommand(()-> arm.manualArmPositionUp(), arm));
     
     // operatorJoystick.b().whileTrue(new InstantCommand(()-> arm.setArmPosition(40), arm)).onFalse(new InstantCommand(()-> arm.setArmPosition(20), arm));
     operatorJoystick.b().whileTrue(new InstantCommand(()-> arm.setFrontSubwooferPosition(), arm));

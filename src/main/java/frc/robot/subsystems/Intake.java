@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -33,8 +32,8 @@ import frc.robot.trobot5013lib.led.TrobotAddressableLED;
 
 public class Intake extends SubsystemBase {
   
-  private CANSparkMax intakeSparkMax = new CANSparkMax(21, MotorType.kBrushed);
-  private SparkAbsoluteEncoder throughBoreEncoder = intakeSparkMax.getAbsoluteEncoder();
+  public static CANSparkMax intakeSparkMax = new CANSparkMax(21, MotorType.kBrushed);
+  public static SparkAbsoluteEncoder throughBoreEncoder = intakeSparkMax.getAbsoluteEncoder();
   private boolean intakeSensorBoolean;
   // intakeSparkMax.getEncoder(Type.kQuadrature, 8192);
 
@@ -57,7 +56,6 @@ public class Intake extends SubsystemBase {
   Color[] chasingColorArray = new Color[3];
   
   TrobotAddressableLED m_ledStrip = new TrobotAddressableLED(3, 60);
-  
   BlinkingPattern blinkingOrange = new BlinkingPattern(orange, 0.6);
   ChasePattern chaseOrange = new ChasePattern(chasingColorArray, 10);
   IntensityPattern testIntensityPattern = new IntensityPattern(lawngreen, orange, 0.8);
@@ -122,9 +120,6 @@ public class Intake extends SubsystemBase {
     topSensorReadount.setBoolean(infaredReflectionTop.get());
   }
 
-  public SparkAbsoluteEncoder getThroughBoreEncoder() {
-    return throughBoreEncoder;
-  }
   public void booleanSetSpeed(boolean bool, double speed) {
     if (bool == true) {
       intakeSparkMax.set(speed);
