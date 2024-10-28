@@ -87,10 +87,12 @@ public class TunerConstants {
             .withDriveInertia(kDriveInertia)
             .withSteerFrictionVoltage(kSteerFrictionVoltage)
             .withDriveFrictionVoltage(kDriveFrictionVoltage)
-            .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
+            .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Was FusedCANcoder
             .withCouplingGearRatio(kCoupleRatio)
-            .withSteerMotorInverted(kSteerMotorReversed);
-
+            .withSteerMotorInverted(kSteerMotorReversed)
+            .withSteerMotorClosedLoopOutput(steerClosedLoopOutput)
+            .withDriveMotorClosedLoopOutput(driveClosedLoopOutput);
+         
 
     // Front Left
     private static final int kFrontLeftDriveMotorId = 4;

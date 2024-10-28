@@ -6,21 +6,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "oneNoteSubwooferRoutine"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Center subwoofer leave"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "printSomething"
           }
         }
       ]
