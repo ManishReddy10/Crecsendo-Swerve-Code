@@ -6,15 +6,24 @@ package frc.robot.subsystems;
 
 import java.util.List;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.Constants;
+import edu.wpi.first.math.util.Units;
+
 /*
  * 
  * 
@@ -36,21 +45,24 @@ public class Vision extends SubsystemBase {
     final double GOAL_RANGE_METERS = Units.feetToMeters(3);
 
     // Change this to match the name of your camera
-    PhotonCamera camera = new PhotonCamera("photonvision");
-
-    PhotonCamera noteCam = new PhotonCamera("Microsoft_LifeCam_HD-3000 (1)");
-    PhotonCamera aprilCam = new PhotonCamera("USB_Camera");
+    public PhotonCamera camera;
   
     // The field from AprilTagFields will be different depending on the game.
-    AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+    public AprilTagFieldLayout aprilTagFieldLayout;
+	
+	// PhotonVision pose estimator
+	public PhotonPoseEstimator poseEstimator;
 
   /** Creates a new Vision. */
   public Vision() {
+    camera = new PhotonCamera("Microsoft_LifeCam_HD-3000 (1)");
+	aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+	poseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, Constants.kRobotToMainCam);
     PortForwarder.add(5800, "photonvision.local", 5800);
-    noteCam.setDriverMode(true);
-    noteCam.setPipelineIndex(1); // Note pipeline
-    aprilCam.setDriverMode(false);
-    aprilCam.setPipelineIndex(2); // AprilTag pipeline
+//    noteCam.setDriverMode(true);
+//    noteCam.setPipelineIndex(1); // Note pipeline
+    camera.setDriverMode(false);
+    camera.setPipelineIndex(2); // AprilTag pipeline
 
   }
 
@@ -59,17 +71,22 @@ public class Vision extends SubsystemBase {
   // }
 
   // PhotonPoseEstimator photonPoseEstimate = new PhotonPoseEstimator(null, null, null)
-  boolean hasTargets;
-  List<PhotonTrackedTarget> targets;
+  private boolean hasTargets;
+  private List<PhotonTrackedTarget> targets;
+  private Optional<EstimatedRobotPose> estimated;
+  private final Field2d m_field = new Field2d();
+  
+  public void updatePose(){
+	estimated = poseEstimator.update(camera.getLatestResult());
+	
+	if(estimated.isPresent()){
+		m_field.setRobotPose(estimated.get().estimatedPose.toPose2d());
+	}
+	
+  }
+  
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-     var result = camera.getLatestResult();
-     hasTargets = result.hasTargets();
-
-    // Get a list of currently tracked targets.
-    targets = result.getTargets();
-
-
+    updatePose();
   }
 }
