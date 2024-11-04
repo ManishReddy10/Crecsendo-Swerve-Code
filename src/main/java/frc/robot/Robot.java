@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import org.photonvision.PhotonCamera;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.net.PortForwarder;

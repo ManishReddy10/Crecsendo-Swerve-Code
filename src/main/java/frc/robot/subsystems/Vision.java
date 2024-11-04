@@ -4,72 +4,105 @@
 
 package frc.robot.subsystems;
 
-import java.util.List;
+import java.util.Optional;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.CommandSwerveDrivetrain;
+import frc.robot.Constants.VisionConstants;
+
+public class Vision extends SubsystemBase {
+  /** Creates a new NewVision. */
+  public final PhotonCamera mainCam;
+  public final PhotonCamera backCam;
+  public AprilTagFieldLayout tagLayout;
+  public PhotonPoseEstimator mainPoseEstimator;
+  public PhotonPoseEstimator backPoseEstimator;
+  private Optional<EstimatedRobotPose> mainEstimated;
+  private Optional<EstimatedRobotPose> backEstimated;
+  private CommandSwerveDrivetrain swerve;
+  public PhotonPipelineResult notePipelineResult;
+
+  public PhotonPipelineResult mainCamPipelineResult = new PhotonPipelineResult();
+  public PhotonPipelineResult backCamPipelineResult = new PhotonPipelineResult();
+
+
+  private final Field2d m_field = new Field2d();
+
 /*
  * 
+ *                                          TODO
  * 
+ *  1) Get kMainCameraName and kBackCameraName from photonVision UI and input them into VisionConstants.java
+ *  3) Test code using advantagescope to check pose output
+ *  2) Not yet but eventually: kRobotToMainCam and kRobotToBackCam Variables
  * 
- * LOOK AT THIS REPO
- * https://github.com/Pantherbotics/FRC-2024-Crescendo/blob/main/src/main/java/frc/robot/subsystems/Vision.java
  * 
  * 
  * 
  */
-public class Vision extends SubsystemBase {
-    
-    final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(24);
-    final double TARGET_HEIGHT_METERS = Units.feetToMeters(5);
-    // Angle between horizontal and the camera.
-    final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
-
-    // How far from the target we want to be
-    final double GOAL_RANGE_METERS = Units.feetToMeters(3);
-
-    // Change this to match the name of your camera
-    PhotonCamera camera = new PhotonCamera("photonvision");
-
-    PhotonCamera noteCam = new PhotonCamera("Microsoft_LifeCam_HD-3000 (1)");
-    PhotonCamera aprilCam = new PhotonCamera("USB_Camera");
   
-    // The field from AprilTagFields will be different depending on the game.
-    AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
-  /** Creates a new Vision. */
-  public Vision() {
-    PortForwarder.add(5800, "photonvision.local", 5800);
-    noteCam.setDriverMode(true);
-    noteCam.setPipelineIndex(1); // Note pipeline
-    aprilCam.setDriverMode(false);
-    aprilCam.setPipelineIndex(2); // AprilTag pipeline
+  public Vision(CommandSwerveDrivetrain swerve) {
+    mainCam = new PhotonCamera(VisionConstants.kMainCameraName);
+    backCam = new PhotonCamera(VisionConstants.kBackCameraName);
+    this.swerve = swerve;
+    tagLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+    // mainPoseEstimator = new PhotonPoseEstimator(tagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, mainCam, VisionConstants.kRobotToMainCam);
+    // backPoseEstimator = new PhotonPoseEstimator(tagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, backCam, VisionConstants.kRobotToBackCam);
+    mainPoseEstimator = new PhotonPoseEstimator(tagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, VisionConstants.kRobotToMainCam);
+    backPoseEstimator = new PhotonPoseEstimator(tagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, VisionConstants.kRobotToBackCam);
+    
+
+    SmartDashboard.putData("cam poses", m_field);
+    
+    
+  }
+
+  public void updateAiprilTagPipelineResults() {
+    if (mainCam.getAllUnreadResults().size() > 0) {
+      mainCamPipelineResult = mainCam.getAllUnreadResults().get(mainCam.getAllUnreadResults().size()-1);
+    }
+
+    if (backCam.getAllUnreadResults().size() > 0) {
+      backCamPipelineResult = backCam.getAllUnreadResults().get(backCam.getAllUnreadResults().size()-1);
+    }
+    
+  }
+
+  public void updatePose(){
+    // mainEstimated = mainPoseEstimator.update(mainCamPipelineResult);
+    // backEstimated = backPoseEstimator.update(backCamPipelineResult);
+
+    mainEstimated = mainPoseEstimator.update(mainCam.getLatestResult());
+    backEstimated = backPoseEstimator.update(backCam.getLatestResult());
+    
+    if (mainEstimated.isPresent()){
+      swerve.addVisionMeasurement(mainEstimated.get().estimatedPose.toPose2d(), mainEstimated.get().timestampSeconds);
+      m_field.setRobotPose(mainEstimated.get().estimatedPose.toPose2d());
+    }
+    if (backEstimated.isPresent()){
+      swerve.addVisionMeasurement(backEstimated.get().estimatedPose.toPose2d(), backEstimated.get().timestampSeconds);
+      m_field.getObject("backCam").setPose(backEstimated.get().estimatedPose.toPose2d());
+    }
 
   }
 
-  // public getSpeakerTagAngle() {
 
-  // }
-
-  // PhotonPoseEstimator photonPoseEstimate = new PhotonPoseEstimator(null, null, null)
-  boolean hasTargets;
-  List<PhotonTrackedTarget> targets;
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-     var result = camera.getLatestResult();
-     hasTargets = result.hasTargets();
-
-    // Get a list of currently tracked targets.
-    targets = result.getTargets();
-
-
+    // updateAiprilTagPipelineResults();
+    updatePose();
   }
 }
+
